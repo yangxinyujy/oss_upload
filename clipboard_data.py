@@ -3,12 +3,14 @@ query = "{query}"
 import time
 import oss2
 import json
+import tinify
 
 from AppKit import NSPasteboard, NSPasteboardTypePNG, NSFilenamesPboardType
 
 access_key_id = '<yourAccessKeyId>'
 access_key_secret = '<yourAccessKeySecret>'
 bucket_name = '<yourBucketName>'
+tinify.key = "YOUR_API_KEY"
 
 def get_paste_img_file():
     """
@@ -42,6 +44,9 @@ def upload_file():
     key_name = file_name[file_name.rfind('/'):]
     date = time.strftime("%Y-%m-%d", time.localtime())
     key = date + key_name
+    # 图片压缩
+    source = tinify.from_file(file_name)
+    source.to_file(file_name)
     result = bucket.put_object_from_file(key, file_name)
     url = result.resp.response.url
     data = {
