@@ -150,4 +150,9 @@ https://github.com/CQHui/oss_upload
 如果喜欢的不能自己，可以再悬赏下~
 <div align=center><img width="40%" height="40%" src="http://qihui-picture.oss-cn-hangzhou.aliyuncs.com/2018-07-20%2F1532057805.png"/></div>
 
+## 图片压缩
 
+图片压缩使用 [tyny](https://tinypng.com) 的图片压缩接口（未被墙），每月500张的免费额度，之后按照每张6分钱计算，超过10000张1.4分钱。
+对于普通用户免费额度已经足够使用了。
+
+申请 [API Key](https://tinypng.com/dashboard/api) 填入 tinify.key 即可使用。
