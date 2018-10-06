@@ -45,8 +45,10 @@ def upload_file():
     date = time.strftime("%Y-%m-%d", time.localtime())
     key = date + key_name
     # 图片压缩
-    source = tinify.from_file(file_name)
-    source.to_file(file_name)
+    m = re.search(r'.gif', key_name);
+    if m is None:
+        source = tinify.from_file(file_name)
+        source.to_file(file_name)
     result = bucket.put_object_from_file(key, file_name)
     url = result.resp.response.url
     data = {
