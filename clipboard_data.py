@@ -4,6 +4,7 @@ import time
 import oss2
 import json
 import tinify
+import re
 
 from AppKit import NSPasteboard, NSPasteboardTypePNG, NSFilenamesPboardType
 
@@ -29,28 +30,21 @@ def get_paste_img_file():
             return filepath
 
     elif NSFilenamesPboardType in data_type:
-        # file in machine
         return pb.propertyListForType_(NSFilenamesPboardType)[0]
-
-
-
 
 def upload_file():
 
     auth = oss2.Auth(access_key_id, access_key_secret)
-    # Endpoint以杭州为例，其它Region请按实际情况填写。
-    bucket = oss2.Bucket(auth, 'http://oss-cn-hangzhou.aliyuncs.com', bucket_name)
-    file_name = get_paste_img_file()
-    key_name = file_name[file_name.rfind('/'):]
-    date = time.strftime("%Y-%m-%d", time.localtime())
-    key = date + key_name
-    # 图片压缩
-    m = re.search(r'.gif', key_name);
-    if m is None:
-        source = tinify.from_file(file_name)
-        source.to_file(file_name)
-    result = bucket.put_object_from_file(key, file_name)
+    bucket = oss2.Bucket(auth, 'oss-cn-beijing.aliyuncs.com', bucket_name)
+    fileDir = get_paste_img_file()
+    fileName = fileDir[fileDir.rfind('/') + 1:]
+    date = time.strftime("%Y-%m", time.localtime())
+    key = date + '/'  + fileName
+    compressedImage(fileDir);
+    result = bucket.put_object_from_file(key, fileDir)
+    # print(result.resp.response.__dict__)
     url = result.resp.response.url
+    url = url.replace("yangxinyujy-images.oss-cn-beijing.aliyuncs.com","images.xyang.xin")
     data = {
         'items' : [
             {'title' : 'url', 'arg': url,  "icon":
@@ -59,7 +53,7 @@ def upload_file():
                     'path': 'icon.png'
                 }
              },
-            {'title': 'md', 'arg': '![](%s)' % url, 'icon':
+            {'title': 'md', 'arg': '![' + fileName + '](%s)' % url, 'icon':
                 {
                     'type': 'png',
                     'path': 'icon.png'
@@ -70,7 +64,33 @@ def upload_file():
     url_result = json.dumps(data)
     print(url_result)
 
+def compress_path(path, compress):
+    auth = oss2.Auth(access_key_id, access_key_secret)
+    bucket = oss2.Bucket(auth, 'oss-cn-beijing.aliyuncs.com', bucket_name)
+    resultArray = []
+    for root, dirs, files in os.walk(fromFilePath):
+        for name in files:
+            fileName, fileSuffix = os.path.splitext(name)
+            if fileSuffix == '.png' or fileSuffix == '.jpg' or fileSuffix == '.jpeg':
+                fileName = fileDir[fileDir.rfind('/') + 1:]
+                key = date + '/'  + fileName
+                if compress:
+                    compressedImage(fileDir);
+                result = bucket.put_object_from_file(key, fileDir)
+                url = result.resp.response.url
+                resultArray.append(url)
+        break
+    print(resultArray)
 
+def compressedImage(fileDir):
+    """
+    图像压缩
+    """
+    m = re.search(r'.gif', fileDir)
+    if m is None:
+        source = tinify.from_file(fileDir)
+        source.to_file(fileDir)
+    
 
 if __name__ == '__main__':
     upload_file()
